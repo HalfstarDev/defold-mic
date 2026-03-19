@@ -1,0 +1,6 @@
+name: "Mic"
+
+platforms:
+    ios:
+        context:
+            linkFlags:  ["-ObjC"]

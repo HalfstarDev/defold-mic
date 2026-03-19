@@ -1,0 +1,113 @@
+- name: mic
+  type: table
+  desc: Functions for microphone recording via miniaudio
+
+  members:
+
+#*****************************************************************************************************
+
+  - name: start
+    type: function
+    desc: Begin audio capture.
+
+    parameters:
+      - name: options
+        type: table
+        desc: Optional table of capture settings.
+        parameters:
+          - name: device_index
+            type: number
+            desc: Zero-based index of the capture device to use, as returned by mic.get_devices(). Defaults to the system default device.
+
+          - name: sample_rate
+            type: number
+            desc: Sample rate in Hz. Usually 16000, 22050, 44100, or 48000. Defaults to 16000.
+
+          - name: channels
+            type: number
+            desc: Number of audio channels. Must be 1 (mono) or 2 (stereo). Defaults to 1.
+
+          - name: max_seconds
+            type: number
+            desc: Maximum number of seconds to buffer. Once reached, incoming audio is discarded. 0 or omitted means unlimited.
+
+          - name: noise_gate_threshold
+            type: number
+            desc: Amplitude threshold in range [0.0, 1.0]. Frames whose peak amplitude falls below are silenced. Defaults to 0.
+
+#*****************************************************************************************************
+
+  - name: stop
+    type: function
+    desc: Stop audio capture and return the recorded audio as a WAV byte string.
+
+    returns:
+      - name: wav
+        type: string
+        desc: Raw WAV-encoded audio bytes, or nil if nothing was recorded.
+
+#*****************************************************************************************************
+
+  - name: is_recording
+    type: function
+    desc: Check whether the microphone is currently capturing audio.
+
+    returns:
+      - name: recording
+        type: boolean
+        desc: True if currently recording, false otherwise.
+
+#*****************************************************************************************************
+
+  - name: is_connected
+    type: function
+    desc: Check whether at least one capture device is available on the system.
+
+    returns:
+      - name: connected
+        type: boolean
+        desc: True if one or more capture devices are available, false otherwise.
+
+#*****************************************************************************************************
+
+  - name: get_devices
+    type: function
+    desc: Enumerate all available capture devices.
+
+    returns:
+      - name: devices
+        type: table
+        desc: List of device info tables, with keys 'index' and 'name'.
+
+#*****************************************************************************************************
+
+  - name: get_peak
+    type: function
+    desc: Get the peak amplitude of the current block.
+
+    returns:
+      - name: peak
+        type: number
+        desc: Normalised peak amplitude in the range [0.0, 1.0], or 0.0 if not recording.
+
+#*****************************************************************************************************
+
+  - name: get_rms
+    type: function
+    desc: Get the RMS (root mean square) volume of the current block.
+
+    returns:
+      - name: rms
+        type: number
+        desc: Normalised RMS value in the range [0.0, 1.0], or 0.0 if not recording.
+
+#*****************************************************************************************************
+
+  - name: get_duration
+    type: function
+    desc: Get the duration of audio buffered so far in the current recording.
+
+    returns:
+      - name: duration
+        type: number
+        desc: Duration in seconds, or 0.0 if not recording.
