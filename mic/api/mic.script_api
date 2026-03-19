@@ -1,15 +1,11 @@
 - name: mic
   type: table
   desc: Functions for microphone recording via miniaudio
-
   members:
-
-#*****************************************************************************************************
 
   - name: start
     type: function
     desc: Begin audio capture.
-
     parameters:
       - name: options
         type: table
@@ -35,8 +31,6 @@
             type: number
             desc: Amplitude threshold in range [0.0, 1.0]. Frames whose peak amplitude falls below are silenced. Defaults to 0.
 
-#*****************************************************************************************************
-
   - name: stop
     type: function
     desc: Stop audio capture and return the recorded audio as a WAV byte string.
@@ -45,8 +39,6 @@
       - name: wav
         type: string
         desc: Raw WAV-encoded audio bytes, or nil if nothing was recorded.
-
-#*****************************************************************************************************
 
   - name: is_recording
     type: function
@@ -57,8 +49,6 @@
         type: boolean
         desc: True if currently recording, false otherwise.
 
-#*****************************************************************************************************
-
   - name: is_connected
     type: function
     desc: Check whether at least one capture device is available on the system.
@@ -67,8 +57,6 @@
       - name: connected
         type: boolean
         desc: True if one or more capture devices are available, false otherwise.
-
-#*****************************************************************************************************
 
   - name: get_devices
     type: function
@@ -79,8 +67,6 @@
         type: table
         desc: List of device info tables, with keys 'index' and 'name'.
 
-#*****************************************************************************************************
-
   - name: get_peak
     type: function
     desc: Get the peak amplitude of the current block.
@@ -90,8 +76,6 @@
         type: number
         desc: Normalised peak amplitude in the range [0.0, 1.0], or 0.0 if not recording.
 
-#*****************************************************************************************************
-
   - name: get_rms
     type: function
     desc: Get the RMS (root mean square) volume of the current block.
@@ -100,8 +84,6 @@
       - name: rms
         type: number
         desc: Normalised RMS value in the range [0.0, 1.0], or 0.0 if not recording.
-
-#*****************************************************************************************************
 
   - name: get_duration
     type: function
