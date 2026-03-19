@@ -1,0 +1,63 @@
+local devices = {}
+local device_index = -1
+
+local function show_input_devices()
+	devices = mic.get_devices()
+	for i = 1, 4 do
+		if devices[i] then
+			gui.set_enabled(gui.get_node("input_device_"..i), true)
+			gui.set_text(gui.get_node("input_device_text_"..i), devices[i].index .. ". " .. devices[i].name)
+		else
+			gui.set_enabled(gui.get_node("input_device_"..i), false)
+		end
+	end
+end
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	show_input_devices()
+end
+
+function update(self, dt)
+	if mic.is_recording() then
+		gui.set_size(gui.get_node("peak"), vmath.vector3(200, 10 + 90 * mic.get_peak(), 0))
+	else
+		gui.set_size(gui.get_node("peak"), vmath.vector3(200, 0, 0))
+	end
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("touch") and action.pressed then
+		if gui.pick_node(gui.get_node("record"), action.x, action.y) then
+			if mic.is_recording() then
+				local wav = mic.stop()
+				resource.set_sound(hash("/example/silence.wavc"), wav)
+				gui.set_text(gui.get_node("record_text"), "Start\nrecording")
+				gui.set_enabled(gui.get_node("play"), true)
+				show_input_devices()
+			else
+				--mic.start({device_index = device_index or -1})
+				mic.start({device_index = device_index})
+				gui.set_text(gui.get_node("record_text"), "Stop\nrecording")
+				gui.set_enabled(gui.get_node("play"), false)
+			end
+		elseif gui.pick_node(gui.get_node("play"), action.x, action.y) then
+			sound.stop("/example#sound")
+			sound.play("/example#sound")
+		else
+			for i = 1, 4 do
+				if devices[i] and gui.pick_node(gui.get_node("input_device_"..i), action.x, action.y) then
+					for j = 1, 4 do
+						gui.set_color(gui.get_node("input_device_"..j), vmath.vector3(1, 1, 1))
+					end
+					if device_index == devices[i].index then
+						device_index = -1
+					else
+						device_index = devices[i].index
+						gui.set_color(gui.get_node("input_device_"..i), vmath.vector3(1, 0.5, 0.5))
+					end
+				end
+			end
+		end
+	end
+end

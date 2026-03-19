@@ -1,4 +1,4 @@
-script: "/example/example.gui_script"
+script: "/example/example_devices.gui_script"
 fonts {
   name: "default"
   font: "/builtins/fonts/default.font"
@@ -93,6 +93,138 @@ nodes {
   font: "default"
   id: "play_text"
   parent: "play"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    x: 810.0
+    y: 545.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_BOX
+  id: "input_device_1"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+}
+nodes {
+  size {
+    x: 180.0
+    y: 80.0
+  }
+  color {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  type: TYPE_TEXT
+  text: "Input device"
+  font: "default"
+  id: "input_device_text_1"
+  line_break: true
+  parent: "input_device_1"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    x: 810.0
+    y: 395.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_BOX
+  id: "input_device_2"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+}
+nodes {
+  size {
+    x: 180.0
+    y: 80.0
+  }
+  color {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  type: TYPE_TEXT
+  text: "Input device"
+  font: "default"
+  id: "input_device_text_2"
+  line_break: true
+  parent: "input_device_2"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    x: 810.0
+    y: 245.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_BOX
+  id: "input_device_3"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+}
+nodes {
+  size {
+    x: 180.0
+    y: 80.0
+  }
+  color {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  type: TYPE_TEXT
+  text: "Input device"
+  font: "default"
+  id: "input_device_text_3"
+  line_break: true
+  parent: "input_device_3"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    x: 810.0
+    y: 95.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_BOX
+  id: "input_device_4"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  enabled: false
+}
+nodes {
+  size {
+    x: 180.0
+    y: 80.0
+  }
+  color {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  type: TYPE_TEXT
+  text: "Input device"
+  font: "default"
+  id: "input_device_text_4"
+  line_break: true
+  parent: "input_device_4"
   inherit_alpha: true
 }
 material: "/builtins/materials/gui.material"

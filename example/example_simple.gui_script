@@ -1,0 +1,31 @@
+function init(self)
+	msg.post(".", "acquire_input_focus")
+end
+
+function update(self, dt)
+	if mic.is_recording() then
+		gui.set_size(gui.get_node("peak"), vmath.vector3(200, 10 + 90 * mic.get_peak(), 0))
+	else
+		gui.set_size(gui.get_node("peak"), vmath.vector3(200, 0, 0))
+	end
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("touch") and action.pressed then
+		if gui.pick_node(gui.get_node("record"), action.x, action.y) then
+			if mic.is_recording() then
+				local wav = mic.stop()
+				resource.set_sound(hash("/example/silence.wavc"), wav)
+				gui.set_text(gui.get_node("record_text"), "Start\nrecording")
+				gui.set_enabled(gui.get_node("play"), true)
+			else
+				mic.start()
+				gui.set_text(gui.get_node("record_text"), "Stop\nrecording")
+				gui.set_enabled(gui.get_node("play"), false)
+			end
+		elseif gui.pick_node(gui.get_node("play"), action.x, action.y) then
+			sound.stop("/example#sound")
+			sound.play("/example#sound")
+		end
+	end
+end
