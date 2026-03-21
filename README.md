@@ -1,4 +1,4 @@
-![banner](/docs/images/banner.webp)
+![banner](/docs/images/banner.jpg)
 # Defold-Mic
 
 A Defold extension for microphone recording via [miniaudio](https://miniaud.io/).
