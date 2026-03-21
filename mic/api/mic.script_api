@@ -111,3 +111,16 @@
       - name: duration
         type: number
         desc: Duration in seconds, or 0.0 if not recording.
+
+  - name: request_permission
+    type: function
+    desc: Request permission to use the microphone. (macOS and iOS only)
+
+  - name: get_permission_status
+    type: function
+    desc: Get the current status of the permission to use the microphone. (macOS and iOS only)
+
+    returns:
+      - name: status
+        type: string
+        desc: The current status of the permission for recording. 

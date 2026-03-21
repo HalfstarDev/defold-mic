@@ -1,4 +1,4 @@
-![banner](/docs/images/banner.jpg)
+![banner](/docs/images/banner.webp)
 # Defold-Mic
 
 A Defold extension for microphone recording via [miniaudio](https://miniaud.io/).
@@ -157,6 +157,14 @@ mic.request_permission()
 
 #### mic.get_permission_status()
 Get the current status of the permission to use the microphone. (macOS and iOS only)
+
+```
+APPLE_MIC_PERMISSION_UNAVAILABLE    = -1,
+APPLE_MIC_PERMISSION_NOT_DETERMINED = 0,
+APPLE_MIC_PERMISSION_RESTRICTED     = 1,
+APPLE_MIC_PERMISSION_DENIED         = 2,
+APPLE_MIC_PERMISSION_GRANTED        = 3,
+```
 
 ```lua
 local status = mic.get_permission_status()
