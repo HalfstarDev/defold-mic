@@ -34,6 +34,15 @@
   - name: stop
     type: function
     desc: Stop audio capture and return the recorded audio as a WAV byte string.
+    parameters:
+      - name: options
+        type: table
+        desc: Optional table of capture settings.
+        parameters:
+          - name: normalize_peak
+            type: number
+            desc: Peak value to normalize recorded audio to. Must be in (0.0, 1.0].
+
 
     returns:
       - name: wav
@@ -66,6 +75,15 @@
       - name: devices
         type: table
         desc: List of device info tables, with keys 'index' and 'name'.
+
+  - name: get_current_device
+    type: function
+    desc: Returns the name of the current capture device.
+
+    returns:
+      - name: device
+        type: string
+        desc: Name of the current capture device.
 
   - name: get_peak
     type: function
