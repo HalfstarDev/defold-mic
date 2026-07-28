@@ -934,9 +934,6 @@ static int MicIsConnected(lua_State* L)
 #endif
 
     if (!g_Mic.contextInitialized) {
-        // #region agent log
-        dmLogWarning("Mic: is_connected() -> false (context not initialised)");
-        // #endregion
         lua_pushboolean(L, 0);
         return 1;
     }
@@ -950,13 +947,6 @@ static int MicIsConnected(lua_State* L)
     if (result != MA_SUCCESS) {
         dmLogWarning("Mic: is_connected() failed to enumerate capture devices: %s", ma_result_description(result));
     }
-
-    // #region agent log
-    dmLogInfo("Mic: is_connected() context=1 result=%s captureCount=%u -> %s",
-        ma_result_description(result),
-        captureCount,
-        (result == MA_SUCCESS && captureCount > 0) ? "true" : "false");
-    // #endregion
 
     lua_pushboolean(L, (result == MA_SUCCESS && captureCount > 0) ? 1 : 0);
     return 1;
@@ -1098,7 +1088,6 @@ static dmExtension::Result AppInitializeMic(dmExtension::AppParams* params)
     
     dmLogInfo("Mic: AppInitialize");
 #if defined(DM_PLATFORM_IOS)
-    dmLogInfo("Mic: build=session-restore-v2");
     ma_context_config config = ma_context_config_init();
     config.coreaudio.sessionCategory = ma_ios_session_category_play_and_record;
     config.coreaudio.sessionCategoryOptions =

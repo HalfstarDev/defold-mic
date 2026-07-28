@@ -43,9 +43,9 @@ This fork's `mic/ext.manifest` links Apple frameworks (no `-x objective-c++`; th
 
 The extension ships a merge stub at `mic/manifests/ios/Info.plist` (and `mic/manifests/osx/Info.plist`) with `NSMicrophoneUsageDescription`. Defold only merges stubs named `Info.plist` — not `mic-Info.plist`. Your project may also declare the same key in its own Info.plist.
 
-At runtime, call `mic.request_permission()` before recording. The fork initializes miniaudio's Core Audio context with `PlayAndRecord`, `default_to_speaker`, and `mix_with_others` so capture can coexist with Defold playback.
+At runtime, call `mic.request_permission()` before recording. The fork initializes miniaudio's Core Audio context with `PlayAndRecord`, `default_to_speaker`, and `mix_with_others`. Before capture / device enumeration, it also re-applies that session (deactivate → PlayAndRecord → activate) because Defold's OpenAL sound init can otherwise clear capture devices after launch.
 
-After pulling this fork, verify on a **physical iOS device** (not only the simulator): permission prompt → `mic.start` / meter → `mic.stop` → play recorded or bundled audio. Update this note once device verification is done.
+Verified on a physical iPhone: permission → `mic.start` / meter → `mic.stop` → playback.
 
 ## Usage
 
