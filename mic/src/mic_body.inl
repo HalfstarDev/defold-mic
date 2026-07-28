@@ -405,6 +405,15 @@ static bool EnsureIosCaptureAudioSession(const char* reason)
         }
 
         NSError* error = nil;
+
+        // OpenAL may hold the active session; category changes often require deactivate first.
+        if (![session setActive:NO withOptions:AVAudioSessionSetActiveOptionNotifyOthersOnDeactivation error:&error]) {
+            dmLogInfo("Mic: EnsureIosCaptureAudioSession(%s): setActive(NO) note: %s",
+                reason,
+                error != nil ? [[error localizedDescription] UTF8String] : "ok-or-ignored");
+            error = nil;
+        }
+
         const AVAudioSessionCategoryOptions options =
             AVAudioSessionCategoryOptionDefaultToSpeaker |
             AVAudioSessionCategoryOptionMixWithOthers;
@@ -417,13 +426,16 @@ static bool EnsureIosCaptureAudioSession(const char* reason)
         }
 
         if (![session setActive:YES error:&error]) {
-            dmLogWarning("Mic: EnsureIosCaptureAudioSession(%s): setActive failed: %s",
+            dmLogWarning("Mic: EnsureIosCaptureAudioSession(%s): setActive(YES) failed: %s",
                 reason,
                 error != nil ? [[error localizedDescription] UTF8String] : "unknown");
             return false;
         }
 
-        dmLogInfo("Mic: EnsureIosCaptureAudioSession(%s): PlayAndRecord active", reason);
+        NSString* category = [session category];
+        dmLogInfo("Mic: EnsureIosCaptureAudioSession(%s): category=%s PlayAndRecord active",
+            reason,
+            category != nil ? [category UTF8String] : "?");
         return true;
     }
 }
@@ -958,6 +970,10 @@ static int MicGetDevices(lua_State* L)
 
     if (!g_Mic.contextInitialized) return 1;
 
+#if defined(DM_PLATFORM_IOS)
+    PrepareIosCaptureIfNeeded("get_devices");
+#endif
+
     ma_device_info* pPlaybackInfos;
     ma_device_info* pCaptureInfos;
     ma_uint32 playbackCount;
@@ -1082,6 +1098,7 @@ static dmExtension::Result AppInitializeMic(dmExtension::AppParams* params)
     
     dmLogInfo("Mic: AppInitialize");
 #if defined(DM_PLATFORM_IOS)
+    dmLogInfo("Mic: build=session-restore-v2");
     ma_context_config config = ma_context_config_init();
     config.coreaudio.sessionCategory = ma_ios_session_category_play_and_record;
     config.coreaudio.sessionCategoryOptions =
