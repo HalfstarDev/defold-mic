@@ -7,7 +7,13 @@ A Defold extension for microphone recording via [miniaudio](https://miniaud.io/)
 
 This asset can be added as a [library dependency](https://defold.com/manuals/libraries/#setting-up-library-dependencies) in your project.
 
-Add this link to your dependencies: https://github.com/HalfstarDev/defold-mic/archive/master.zip
+While iterating on iOS support, add this fork as a dependency:
+
+```
+https://github.com/jcypher/defold-mic/archive/refs/heads/main.zip
+```
+
+Upstream (when merged): https://github.com/HalfstarDev/defold-mic/archive/master.zip
 
 ## Compatibility
 
@@ -28,7 +34,18 @@ Currently the extension does not seem to work on debug builds from the Defold ed
 
 ### iOS
 
-This extension has not been tested on iOS yet. It should work with `mic.request_permission()`. If you use it on iOS, please tell me the results, positive or negaive.
+iOS (and macOS) compile the extension as Objective-C++ via `mic/src/mic.mm` (shared implementation in `mic_body.inl`). Other platforms use `mic/src/mic.cpp` with the same body — Defold Extender only picks up `.mm` on Apple targets, so a lone `.mm` would break Windows/Linux/HTML5/Android.
+
+This fork's `mic/ext.manifest` links Apple frameworks (no `-x objective-c++`; that flag is not on Extender's whitelist):
+
+* frameworks: `AVFoundation`, `AudioToolbox`, `Foundation`
+* link flag: `-ObjC`
+
+The extension ships a merge stub at `mic/manifests/ios/Info.plist` (and `mic/manifests/osx/Info.plist`) with `NSMicrophoneUsageDescription`. Defold only merges stubs named `Info.plist` — not `mic-Info.plist`. Your project may also declare the same key in its own Info.plist.
+
+At runtime, call `mic.request_permission()` before recording. The fork initializes miniaudio's Core Audio context with `PlayAndRecord`, `default_to_speaker`, and `mix_with_others`. Before capture / device enumeration, it also re-applies that session (deactivate → PlayAndRecord → activate) because Defold's OpenAL sound init can otherwise clear capture devices after launch.
+
+Verified on a physical iPhone: permission → `mic.start` / meter → `mic.stop` → playback.
 
 ## Usage
 
