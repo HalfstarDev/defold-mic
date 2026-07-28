@@ -392,6 +392,97 @@ static void UninitDevice()
     }
 }
 
+#if defined(DM_PLATFORM_IOS)
+// Defold's OpenAL sound init runs after Mic AppInitialize and reconfigures AVAudioSession,
+// which drops capture devices until PlayAndRecord is restored.
+static bool EnsureIosCaptureAudioSession(const char* reason)
+{
+    @autoreleasepool {
+        AVAudioSession* session = [AVAudioSession sharedInstance];
+        if (session == nil) {
+            dmLogWarning("Mic: EnsureIosCaptureAudioSession(%s): sharedInstance is nil", reason);
+            return false;
+        }
+
+        NSError* error = nil;
+        const AVAudioSessionCategoryOptions options =
+            AVAudioSessionCategoryOptionDefaultToSpeaker |
+            AVAudioSessionCategoryOptionMixWithOthers;
+
+        if (![session setCategory:AVAudioSessionCategoryPlayAndRecord withOptions:options error:&error]) {
+            dmLogWarning("Mic: EnsureIosCaptureAudioSession(%s): setCategory failed: %s",
+                reason,
+                error != nil ? [[error localizedDescription] UTF8String] : "unknown");
+            return false;
+        }
+
+        if (![session setActive:YES error:&error]) {
+            dmLogWarning("Mic: EnsureIosCaptureAudioSession(%s): setActive failed: %s",
+                reason,
+                error != nil ? [[error localizedDescription] UTF8String] : "unknown");
+            return false;
+        }
+
+        dmLogInfo("Mic: EnsureIosCaptureAudioSession(%s): PlayAndRecord active", reason);
+        return true;
+    }
+}
+
+static ma_uint32 CountCaptureDevices()
+{
+    if (!g_Mic.contextInitialized) {
+        return 0;
+    }
+
+    ma_device_info* pPlaybackInfos;
+    ma_device_info* pCaptureInfos;
+    ma_uint32 playbackCount = 0;
+    ma_uint32 captureCount = 0;
+    if (ma_context_get_devices(&g_Mic.context, &pPlaybackInfos, &playbackCount, &pCaptureInfos, &captureCount) != MA_SUCCESS) {
+        return 0;
+    }
+    return captureCount;
+}
+
+static bool ReinitIosMaContext(const char* reason)
+{
+    dmLogInfo("Mic: ReinitIosMaContext(%s)", reason);
+    UninitDevice();
+    if (g_Mic.contextInitialized) {
+        ma_context_uninit(&g_Mic.context);
+        g_Mic.contextInitialized = false;
+    }
+
+    ma_context_config config = ma_context_config_init();
+    config.coreaudio.sessionCategory = ma_ios_session_category_play_and_record;
+    config.coreaudio.sessionCategoryOptions =
+        ma_ios_session_category_option_default_to_speaker |
+        ma_ios_session_category_option_mix_with_others;
+
+    if (ma_context_init(NULL, 0, &config, &g_Mic.context) != MA_SUCCESS) {
+        dmLogError("Mic: ReinitIosMaContext(%s): ma_context_init failed", reason);
+        return false;
+    }
+
+    g_Mic.contextInitialized = true;
+    ma_log* log = ma_context_get_log(&g_Mic.context);
+    (void)ma_log_register_callback(log, ma_log_callback_init(MiniaudioLogCallback, NULL));
+    LogCaptureDevices(reason);
+    return true;
+}
+
+static void PrepareIosCaptureIfNeeded(const char* reason)
+{
+    EnsureIosCaptureAudioSession(reason);
+    if (CountCaptureDevices() == 0) {
+        dmLogWarning("Mic: %s: 0 capture devices after session restore; re-init miniaudio context", reason);
+        if (ReinitIosMaContext(reason)) {
+            EnsureIosCaptureAudioSession(reason);
+        }
+    }
+}
+#endif
+
 // mic.get_permission_status()
 static int MicGetPermissionStatus(lua_State* L)
 {
@@ -514,6 +605,10 @@ static int MicStart(lua_State* L)
         dmLogError("Mic: start() failed because the audio context is not initialised");
         return luaL_error(L, "Mic: Audio context was not initialized properly");
     }
+
+#if defined(DM_PLATFORM_IOS)
+    PrepareIosCaptureIfNeeded("start");
+#endif
 
     #if defined(DM_PLATFORM_OSX) || defined(DM_PLATFORM_IOS)
     const AppleMicPermissionStatus permissionStatus = GetAppleMicPermissionStatus();
@@ -820,7 +915,16 @@ static int MicIsConnected(lua_State* L)
 {
     DM_LUA_STACK_CHECK(L, 1);
 
+#if defined(DM_PLATFORM_IOS)
+    if (g_Mic.contextInitialized) {
+        PrepareIosCaptureIfNeeded("is_connected");
+    }
+#endif
+
     if (!g_Mic.contextInitialized) {
+        // #region agent log
+        dmLogWarning("Mic: is_connected() -> false (context not initialised)");
+        // #endregion
         lua_pushboolean(L, 0);
         return 1;
     }
@@ -834,6 +938,13 @@ static int MicIsConnected(lua_State* L)
     if (result != MA_SUCCESS) {
         dmLogWarning("Mic: is_connected() failed to enumerate capture devices: %s", ma_result_description(result));
     }
+
+    // #region agent log
+    dmLogInfo("Mic: is_connected() context=1 result=%s captureCount=%u -> %s",
+        ma_result_description(result),
+        captureCount,
+        (result == MA_SUCCESS && captureCount > 0) ? "true" : "false");
+    // #endregion
 
     lua_pushboolean(L, (result == MA_SUCCESS && captureCount > 0) ? 1 : 0);
     return 1;
