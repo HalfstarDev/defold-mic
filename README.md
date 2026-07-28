@@ -34,9 +34,10 @@ Currently the extension does not seem to work on debug builds from the Defold ed
 
 ### iOS
 
-iOS builds require compiling `mic.cpp` as Objective-C++ and linking Apple frameworks. This fork's `mic/ext.manifest` sets:
+iOS (and macOS) compile the extension as Objective-C++ via `mic/src/mic.mm` (shared implementation in `mic_body.inl`). Other platforms use `mic/src/mic.cpp` with the same body — Defold Extender only picks up `.mm` on Apple targets, so a lone `.mm` would break Windows/Linux/HTML5/Android.
 
-* compile flags: `-x objective-c++` (iOS / `arm64-ios` / `x86_64-ios`)
+This fork's `mic/ext.manifest` links Apple frameworks (no `-x objective-c++`; that flag is not on Extender's whitelist):
+
 * frameworks: `AVFoundation`, `AudioToolbox`, `Foundation`
 * link flag: `-ObjC`
 
