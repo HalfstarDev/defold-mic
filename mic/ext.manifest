@@ -3,4 +3,18 @@ name: "Mic"
 platforms:
     ios:
         context:
-            linkFlags:  ["-ObjC"]
+            flags: ["-x", "objective-c++"]
+            frameworks: ["AVFoundation", "AudioToolbox", "Foundation"]
+            linkFlags: ["-ObjC"]
+
+    arm64-ios:
+        context:
+            flags: ["-x", "objective-c++"]
+            frameworks: ["AVFoundation", "AudioToolbox", "Foundation"]
+            linkFlags: ["-ObjC"]
+
+    x86_64-ios:
+        context:
+            flags: ["-x", "objective-c++"]
+            frameworks: ["AVFoundation", "AudioToolbox", "Foundation"]
+            linkFlags: ["-ObjC"]

@@ -970,7 +970,18 @@ static dmExtension::Result AppInitializeMic(dmExtension::AppParams* params)
     #endif
     
     dmLogInfo("Mic: AppInitialize");
-    if (ma_context_init(NULL, 0, NULL, &g_Mic.context) == MA_SUCCESS) {
+#if defined(DM_PLATFORM_IOS)
+    ma_context_config config = ma_context_config_init();
+    config.coreaudio.sessionCategory = ma_ios_session_category_play_and_record;
+    config.coreaudio.sessionCategoryOptions =
+        ma_ios_session_category_option_default_to_speaker |
+        ma_ios_session_category_option_mix_with_others;
+    const ma_context_config* pConfig = &config;
+#else
+    const ma_context_config* pConfig = NULL;
+#endif
+
+    if (ma_context_init(NULL, 0, pConfig, &g_Mic.context) == MA_SUCCESS) {
         g_Mic.contextInitialized = true;
         dmLogInfo("Mic: Audio context initialised successfully");
         ma_log* log = ma_context_get_log(&g_Mic.context);
